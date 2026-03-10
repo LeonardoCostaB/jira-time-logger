@@ -1,0 +1,13 @@
+model JiraAccount {
+  id            String  @id @default(uuid())
+  companyEmail  String
+  apiToken      String
+  issueKey      String
+  secondsPerDay Int
+  active        Boolean @default(true)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("jira_accounts")
+}
