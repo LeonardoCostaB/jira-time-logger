@@ -1,15 +1,10 @@
-import { useForm } from "vee-validate";
-import { toTypedSchema } from '@vee-validate/zod'
+import { toTypedSchema } from '@vee-validate/zod';
+import { useForm } from 'vee-validate';
 
-import { RegisterSchema } from "./register.schema";
+import { RegisterSchema } from './register.schema';
 
 function useRegister() {
-    const {
-        handleSubmit,
-        defineField,
-        isSubmitting,
-        errors,
-    } = useForm({
+    const { handleSubmit, defineField, isSubmitting, errors } = useForm({
         validationSchema: toTypedSchema(RegisterSchema),
         initialValues: {
             name: '',
@@ -17,10 +12,10 @@ function useRegister() {
 
             email: '',
             password: '',
-        }
+        },
     });
 
-    const onSubmit = handleSubmit(async values => {
+    const onSubmit = handleSubmit(async (values) => {
         const fetchData = await fetch('/api/auth/create-user', {
             method: 'POST',
             headers: {

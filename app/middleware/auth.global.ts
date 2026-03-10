@@ -1,19 +1,20 @@
 export default defineNuxtRouteMiddleware(async (to) => {
-  const publicRoutes = ['/', '/login', '/criar-conta']
-  const isPublicRoute = publicRoutes.includes(to.path)
+    const publicRoutes = ['/', '/login', '/criar-conta'];
+    const isPublicRoute = publicRoutes.includes(to.path);
 
-  if (isPublicRoute) return
+    if (isPublicRoute) return;
 
-  try {
-    const headers = useRequestHeaders(['cookie'])
+    try {
+        const headers = useRequestHeaders(['cookie']);
 
-    await $fetch('/api/pvt/auth/me', {
-      credentials: 'include',
-      headers
-    })
+        await $fetch('/api/pvt/auth/me', {
+            credentials: 'include',
+            headers,
+        });
 
-    return
-  } catch (error) {
-    return navigateTo('/login')
-  }
-})
+        return;
+    } catch (error) {
+        console.error('Authentication error:', error);
+        return navigateTo('/login');
+    }
+});

@@ -1,35 +1,37 @@
-import { getCookie, createError } from 'h3'
-import jwt from 'jsonwebtoken'
-import { ACCESS_TOKEN_NAME } from '../constants/auth'
+import { createError, getCookie } from 'h3';
+import jwt from 'jsonwebtoken';
+
+import { ACCESS_TOKEN_NAME } from '../constants/auth';
 
 export interface RequestContextWithUser extends H3EventContext {
-  user: {
-    sub: string
-    email: string
-  }
+    user: {
+        sub: string;
+        email: string;
+    };
 }
 
-export default defineEventHandler(async (event) => {
-  if (!event.path.startsWith('/api/pvt')) return
+export default defineEventHandler((event) => {
+    if (!event.path.startsWith('/api/pvt')) return;
 
-  const token = getCookie(event, ACCESS_TOKEN_NAME)
+    const token = getCookie(event, ACCESS_TOKEN_NAME);
 
-  if (!token) throw createError({ statusCode: 401, message: 'Unauthorized' })
+    if (!token) throw createError({ statusCode: 401, message: 'Unauthorized' });
 
-  try {
-    const user = jwt.verify(token, process.env.JWT_SECRET as string) as { sub: string; email: string }
+    try {
+        const user = jwt.verify(token, process.env.JWT_SECRET as string) as {
+            sub: string;
+            email: string;
+        };
 
-    event.context.user = user
-  } catch(error) {
-    // log para auditoria
-    if (error instanceof jwt.JsonWebTokenError) {
-      console.error('Invalid JWT token:', error.message)
-    } else {
-      console.error('Error verifying JWT token:', error)
+        event.context.user = user;
+    } catch (error) {
+        // log para auditoria
+        if (error instanceof jwt.JsonWebTokenError) {
+            console.error('Invalid JWT token:', error.message);
+        } else {
+            console.error('Error verifying JWT token:', error);
+        }
+
+        throw createError({ statusCode: 401, message: 'Unauthorized' });
     }
-
-    throw createError({ statusCode: 401, message: 'Unauthorized' })
-  }
-})
-
-
+});

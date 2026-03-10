@@ -1,53 +1,48 @@
-import bcrypt from 'bcryptjs'
-import PrismaService from '../../../db/prisma'
+import bcrypt from 'bcryptjs';
+import z from 'zod';
 
-import { RegisterSchema } from '../../../../app/pages/criar-conta/register.schema'
-import z from 'zod'
+import { RegisterSchema } from '../../../../app/pages/criar-conta/register.schema';
+import PrismaService from '../../../db/prisma';
 
 export default defineEventHandler(async (event) => {
-  const method = event.node.req.method
+    const method = event.node.req.method;
 
-  if (method === 'POST') {
-    const body = await readBody(event)
+    if (method === 'POST') {
+        const body = await readBody(event);
 
-    try {
-      const {
-        name,
-        lastName,
-        email,
-        password,
-      } = RegisterSchema.parse(body)
+        try {
+            const { name, lastName, email, password } = RegisterSchema.parse(body);
 
-      const userFound = await PrismaService.user.findUnique({
-        where: { email },
-      })
+            const userFound = await PrismaService.user.findUnique({
+                where: { email },
+            });
 
-      if (userFound) {
-        throw createError({ statusCode: 409, message: 'User already exists' })
-      }
+            if (userFound) {
+                throw createError({ statusCode: 409, message: 'User already exists' });
+            }
 
-      const hashedPassword = await bcrypt.hash(password, 10)
+            const hashedPassword = await bcrypt.hash(password, 10);
 
-      await PrismaService.user.create({
-        data: {
-          name,
-          lastName,
-          email,
-          password: hashedPassword,
-        },
-      })
-    } catch (error) {
-      console.error('Error creating user:', error)
+            await PrismaService.user.create({
+                data: {
+                    name,
+                    lastName,
+                    email,
+                    password: hashedPassword,
+                },
+            });
+        } catch (error) {
+            console.error('Error creating user:', error);
 
-      if (error instanceof z.ZodError) {
-        throw createError({ statusCode: 400, message: error.format()._errors.join(', ') })
-      }
+            if (error instanceof z.ZodError) {
+                throw createError({ statusCode: 400, message: error.format()._errors.join(', ') });
+            }
 
-      throw createError({ statusCode: 500, message: 'Internal server error' })
+            throw createError({ statusCode: 500, message: 'Internal server error' });
+        }
+
+        return { success: true };
     }
 
-    return { success: true }
-  }
-
-  throw createError({ statusCode: 405, message: 'Method not allowed' })
-})
+    throw createError({ statusCode: 405, message: 'Method not allowed' });
+});

@@ -1,14 +1,10 @@
-import { useForm } from "vee-validate";
-import { toTypedSchema } from '@vee-validate/zod'
-import { JiraPreferencesSchema } from "./jira-preferences.schema";
+import { toTypedSchema } from '@vee-validate/zod';
+import { useForm } from 'vee-validate';
+
+import { JiraPreferencesSchema } from './jira-preferences.schema';
 
 function useJiraPreferences() {
-    const {
-        handleSubmit,
-        defineField,
-        isSubmitting,
-        errors,
-    } = useForm({
+    const { handleSubmit, defineField, isSubmitting, errors } = useForm({
         validationSchema: toTypedSchema(JiraPreferencesSchema),
         initialValues: {
             // jiraUrl: '',
@@ -16,10 +12,10 @@ function useJiraPreferences() {
             jiraApiToken: '',
             jiraIssueKey: '',
             jiraIssueTime: '',
-        }
+        },
     });
 
-    const onSubmit = handleSubmit(async values => {
+    const onSubmit = handleSubmit(async (values) => {
         const fetchData = await fetch('/api/pvt/jira/preferences', {
             method: 'POST',
             headers: {

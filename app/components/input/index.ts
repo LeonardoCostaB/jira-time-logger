@@ -1,8 +1,8 @@
-import InputRoot from './input-root.vue'
-import InputLabel from './input-label.vue'
-import InputNormal from './input-normal.vue'
-import InputPassword from './input-password.vue'
-import InputError from './input-error.vue'
+import InputError from './input-error.vue';
+import InputLabel from './input-label.vue';
+import InputNormal from './input-normal.vue';
+import InputPassword from './input-password.vue';
+import InputRoot from './input-root.vue';
 
 const Input = {
     Root: InputRoot,
@@ -10,6 +10,6 @@ const Input = {
     Normal: InputNormal,
     Password: InputPassword,
     Error: InputError,
-} as const
+} as const;
 
-export { Input }
+export { Input };

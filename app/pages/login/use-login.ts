@@ -1,24 +1,19 @@
-import { useForm } from "vee-validate";
-import { toTypedSchema } from '@vee-validate/zod'
+import { toTypedSchema } from '@vee-validate/zod';
+import axios from 'axios';
+import { useForm } from 'vee-validate';
 
-import { LoginSchema } from "./login.schema";
-import axios from "axios";
+import { LoginSchema } from './login.schema';
 
 function useLogin() {
-    const {
-        handleSubmit,
-        defineField,
-        isSubmitting,
-        errors,
-    } = useForm({
+    const { handleSubmit, defineField, isSubmitting, errors } = useForm({
         validationSchema: toTypedSchema(LoginSchema),
         initialValues: {
             customerEmail: '',
             customerPassword: '',
-        }
+        },
     });
 
-    const onSubmit = handleSubmit(async values => {
+    const onSubmit = handleSubmit(async (values) => {
         const { data } = await axios.post(
             '/api/auth/sign-in',
             {
@@ -27,7 +22,7 @@ function useLogin() {
             },
             {
                 withCredentials: true,
-            }
+            },
         );
         console.log(data);
     });
