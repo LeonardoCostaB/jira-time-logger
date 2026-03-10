@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/pvt/cron/worklog",
+      "schedule": "5 9 * * 1-5"
+    }
+  ]
+}

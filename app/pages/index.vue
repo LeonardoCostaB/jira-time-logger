@@ -1,33 +1,3 @@
-<script setup lang="ts">
-  // import { ref } from 'vue'
-
-  // const email = ref<string>('')
-  // const apiToken = ref<string>('')
-  // const issueKey = ref<string>('')
-
-  // async function save() {
-  //   const data = {
-  //     email: email.value,
-  //     apiToken: apiToken.value,
-  //     issueKey: issueKey.value
-  //   }
-
-  //   const fetchData = await fetch('/jira-preferences', {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json'
-  //     },
-  //     body: JSON.stringify(data)
-  //   })
-
-  //   if (fetchData.ok) {
-  //     alert('Preferências salvas com sucesso!')
-  //   } else {
-  //     alert('Erro ao salvar preferências.')
-  //   }
-  // }
-</script>
-
 <template>
   <main class="flex items-center justify-center">
     <div class="flex-1 bg-slate-800 flex flex-col items-center justify-center p-8 gap-6 max-w-4xl">

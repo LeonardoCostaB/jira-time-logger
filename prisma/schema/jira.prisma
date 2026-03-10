@@ -1,13 +1,30 @@
 model JiraAccount {
-  id            String  @id @default(uuid())
-  companyEmail  String
-  apiToken      String
-  issueKey      String
-  secondsPerDay Int
-  active        Boolean @default(true)
+  id           String  @id @default(uuid())
+  companyEmail String
+  apiToken     String
+  issueKey     String
+  issueTime    String
+  active       Boolean @default(true)
 
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  worklogHistories WorklogHistory[]
+
+  @@unique([companyEmail])
   @@map("jira_accounts")
+}
+
+model WorklogHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  timeSpent String
+  date      DateTime 
+  createdAt DateTime @default(now())
+
+  jiraAccountId String
+  jiraAccount   JiraAccount @relation(fields: [jiraAccountId], references: [id], onDelete: Cascade)
+
+  @@unique([jiraAccountId, date])
+  @@map("jira_worklog_histories")
 }

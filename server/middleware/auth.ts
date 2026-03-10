@@ -1,8 +1,8 @@
-import { getCookie, createError, H3Context } from 'h3'
+import { getCookie, createError } from 'h3'
 import jwt from 'jsonwebtoken'
 import { ACCESS_TOKEN_NAME } from '../constants/auth'
 
-interface RequestContextWithUser extends H3Context {
+export interface RequestContextWithUser extends H3EventContext {
   user: {
     sub: string
     email: string
