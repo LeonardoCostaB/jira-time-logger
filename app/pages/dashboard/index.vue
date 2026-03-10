@@ -10,11 +10,6 @@
   } = useJiraPreferences()
 
   const [
-    jiraUrl,
-    jiraUrlAttrs
-  ] = defineField('jiraUrl')
-
-  const [
     jiraEmail,
     jiraEmailAttrs
   ] = defineField('jiraEmail')
@@ -36,10 +31,6 @@
 
   const hasErrors = computed(() => {
       return {
-          jiraUrl: {
-              show: !!errors.value.jiraUrl,
-              message: errors.value.jiraUrl
-          },
           jiraEmail: {
               show: !!errors.value.jiraEmail,
               message: errors.value.jiraEmail

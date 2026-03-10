@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs'
 import PrismaService from '../../../db/prisma'
 
-import { UserRegister, RegisterSchema } from '../../../../app/pages/criar-conta/register.schema'
+import { RegisterSchema } from '../../../../app/pages/criar-conta/register.schema'
 import z from 'zod'
 
 export default defineEventHandler(async (event) => {
