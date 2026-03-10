@@ -1,75 +1,23 @@
-# Nuxt Minimal Starter
+# Jira Time Logger
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Uma aplicação para automatizar e facilitar o registro de horas no Jira.
 
-## Setup
+O objetivo do projeto é permitir que desenvolvedores registrem automaticamente suas horas de trabalho, evitando esquecimentos e reduzindo tarefas manuais.
 
-Make sure to install dependencies:
+A aplicação também permite que membros de um time configurem suas credenciais do Jira para que o sistema registre horas automaticamente em horários pré-definidos.
 
-```bash
-# npm
-npm install
+## 🚀 Tecnologias
 
-# pnpm
-pnpm install
+Este projeto foi desenvolvido utilizando:
 
-# yarn
-yarn install
+- Nuxt 3
+- Vue 3
+- TypeScript
+- TailwindCSS
+- Prisma ORM
+- PostgreSQL
+- Docker
 
-# bun
-bun install
-```
+## 📦 Arquitetura
 
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
-npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
-```
-
-## Production
-
-Build the application for production:
-
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+O projeto segue uma estrutura simples separando frontend, backend e banco de dados.
