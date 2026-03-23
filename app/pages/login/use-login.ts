@@ -1,3 +1,4 @@
+import { toast } from 'vue-sonner';
 import { toTypedSchema } from '@vee-validate/zod';
 import axios from 'axios';
 import { useForm } from 'vee-validate';
@@ -27,6 +28,7 @@ function useLogin() {
             );
 
             if (data.success) {
+                toast.success('Login successful! Redirecting to dashboard...');
                 window.location.href = '/dashboard';
             }
         } catch (error) {

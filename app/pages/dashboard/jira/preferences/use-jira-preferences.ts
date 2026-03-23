@@ -1,3 +1,4 @@
+import { toast } from 'vue-sonner';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
 
@@ -35,22 +36,29 @@ async function useJiraPreferences() {
     });
 
     const onSubmit = handleSubmit(async (values) => {
-        const fetchData = await fetch('/api/pvt/jira/preferences', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                jiraEmail: values.jiraEmail,
-                jiraDomain: values.jiraDomain,
-                jiraApiToken: values.jiraApiToken,
-                jiraIssueKey: values.jiraIssueKey,
-                jiraIssueTime: values.jiraIssueTime,
-            }),
-        });
+        try {
+            const fetchData = await fetch('/api/pvt/jira/preferences', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    jiraEmail: values.jiraEmail,
+                    jiraDomain: values.jiraDomain,
+                    jiraApiToken: values.jiraApiToken,
+                    jiraIssueKey: values.jiraIssueKey,
+                    jiraIssueTime: values.jiraIssueTime,
+                }),
+            });
 
-        const data = await fetchData.json();
-        console.log(data);
+            const data = await fetchData.json();
+            if (data?.message) {
+                toast.success(data.message);
+            }
+        } catch (error) {
+            console.error('Error saving Jira preferences:', error);
+            toast.error('Failed to save Jira preferences. Please try again.');
+        }
     });
 
     return {
