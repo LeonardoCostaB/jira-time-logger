@@ -1,5 +1,10 @@
 import prismaService from '~~/server/db/prisma';
 
+import { isSameDay } from '../jira/utils/day-compare';
+import { decrypt } from '../jira/utils/encrypt';
+
+import { isHoliday } from './utils/is-holiday';
+
 export default defineEventHandler(async (event) => {
     const user = event.context.user as { sub: string; email: string };
 
@@ -8,9 +13,10 @@ export default defineEventHandler(async (event) => {
         select: {
             id: true,
             companyEmail: true,
-            issueTime: true,
+            companyDomain: true,
             active: true,
-            worklogHistories: true,
+            apiToken: true,
+            issues: true,
         },
     });
 
@@ -34,37 +40,133 @@ export default defineEventHandler(async (event) => {
 
     const today = new Date();
 
-    const alreadyLogged = await prismaService.worklogHistory.findFirst({
-        where: {
-            jiraAccountId: userJiraAccount.id,
-        },
-    });
-
-    const alreadyLoggedToday =
-        alreadyLogged && alreadyLogged.date.toDateString() === today.toDateString();
-
-    if (alreadyLoggedToday) {
-        console.log(`Worklog already logged for user ${user.sub} today`);
+    const isTodayHoliday = await isHoliday(today.toISOString().slice(0, 10));
+    if (isTodayHoliday) {
+        console.log(`Today is a holiday. No worklogs will be logged for user ${user.sub}`);
         return {
-            statusCode: 204,
+            statusCode: 200,
+            message: 'Today is a holiday. No worklogs were logged.',
         };
     }
 
-    await prismaService.worklogHistory.create({
-        data: {
-            jiraAccountId: userJiraAccount.id,
-            userId: user.sub,
-            timeSpent: userJiraAccount.issueTime,
-            date: today,
-        },
-    });
+    const decryptedApiToken = decrypt(userJiraAccount.apiToken);
 
-    console.log(
-        `Worklog logged for user ${user.sub} with time spent ${userJiraAccount.issueTime} minutes`,
-    );
+    const worklogs: {
+        companyEmail: string;
+        domain: string;
+        issueKey: string;
+        timeSpent: number;
+    }[] = [];
+    const errors: Array<{
+        companyEmail: string;
+        domain: string;
+        issueKey: string;
+        error: { message: string; details: any };
+    }> = [];
+
+    for (const issue of userJiraAccount.issues) {
+        const domain = userJiraAccount.companyDomain;
+        const auth = Buffer.from(`${userJiraAccount.companyEmail}:${decryptedApiToken}`).toString(
+            'base64',
+        );
+
+        const alreadyLogged = await prismaService.worklogHistory.findMany({
+            where: {
+                issueId: issue.id,
+                userId: user.sub,
+            },
+            orderBy: { date: 'desc' },
+            take: 1,
+        });
+
+        const alreadyLoggedToday =
+            alreadyLogged.length > 0 && isSameDay(alreadyLogged?.[0]?.date, today);
+
+        if (alreadyLoggedToday) {
+            console.log(
+                `Worklog already logged for issue ${issue.issueKey} today for user ${user.sub}`,
+            );
+            errors.push({
+                companyEmail: userJiraAccount.companyEmail,
+                domain,
+                issueKey: issue.issueKey,
+                error: {
+                    message: `Worklog already logged for issue ${issue.issueKey} today`,
+                    details: null,
+                },
+            });
+            continue;
+        }
+
+        await prismaService.jiraIssue.update({
+            where: { id: issue.id },
+            data: {
+                totalSpentSoFar: (issue.totalSpentSoFar ?? 0) + issue.issueTime,
+                worklogHistories: {
+                    create: {
+                        userId: user.sub,
+                        secondsPerDay: issue.issueTime,
+                        date: today,
+                    },
+                },
+            },
+        });
+
+        const url = `https://${domain}/rest/api/3/issue/${issue.issueKey}/worklog`;
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                Authorization: `Basic ${auth}`,
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                timeSpentSeconds: issue.issueTime,
+                started: new Date().toISOString().slice(0, 10) + 'T09:00:00.000-0300',
+            }),
+        });
+
+        if (!response.ok) {
+            errors.push({
+                companyEmail: userJiraAccount.companyEmail,
+                domain,
+                issueKey: issue.issueKey,
+                error: {
+                    message: `Failed to log worklog for issue ${issue.issueKey} with status ${response.status}`,
+                    details: await response.json(),
+                },
+            });
+            continue;
+        }
+
+        console.log(
+            `Worklog logged for user ${user.sub} with time spent ${issue.issueTime} minutes`,
+            // { api: await response.json() },
+        );
+
+        worklogs.push({
+            companyEmail: userJiraAccount.companyEmail,
+            domain,
+            issueKey: issue.issueKey,
+            timeSpent: issue.issueTime,
+        });
+    }
+
+    if (errors.length > 0) {
+        console.error(
+            `Errors occurred while logging worklogs for user ${user.sub}:`,
+            JSON.stringify(errors, null, 2),
+        );
+        // implementar envio de email para o usuário com os erros
+        return {
+            statusCode: 400,
+            errors,
+        };
+    }
 
     return {
         statusCode: 200,
-        message: `Worklog logged for user ${user.sub} with time spent ${userJiraAccount.issueTime}`,
+        worklogs,
     };
 });

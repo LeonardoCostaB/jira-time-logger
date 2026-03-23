@@ -9,11 +9,8 @@
     const { onSubmit, defineField, errors } = useRegister();
 
     const [name, nameAttrs] = defineField('name');
-
     const [lastName, lastNameAttrs] = defineField('lastName');
-
     const [email, emailAttrs] = defineField('email');
-
     const [password, passwordAttrs] = defineField('password');
 
     const hasErrors = computed(() => {
@@ -55,58 +52,50 @@
 
         <form class="flex flex-col gap-4 pt-6" @submit="onSubmit">
             <div class="flex items-center gap-4">
-                <Input.Root class="w-full">
+                <Input.Root id="name" :errors="hasErrors.name.show" class="w-full">
                     <Input.Label id="name">Nome</Input.Label>
                     <Input.Normal
                         v-bind="nameAttrs"
-                        id="name"
                         v-model="name"
                         type="text"
                         placeholder="Seu nome"
                     />
-                    <Input.Error v-if="hasErrors.name.show">
+                    <Input.Error>
                         {{ hasErrors.name.message }}
                     </Input.Error>
                 </Input.Root>
 
-                <Input.Root class="w-full">
+                <Input.Root id="lastName" :errors="hasErrors.lastName.show" class="w-full">
                     <Input.Label id="lastName">Sobrenome</Input.Label>
                     <Input.Normal
                         v-bind="lastNameAttrs"
-                        id="lastName"
                         v-model="lastName"
                         type="text"
                         placeholder="Seu sobrenome"
                     />
-                    <Input.Error v-if="hasErrors.lastName.show">
+                    <Input.Error>
                         {{ hasErrors.lastName.message }}
                     </Input.Error>
                 </Input.Root>
             </div>
 
-            <Input.Root>
+            <Input.Root id="email" :errors="hasErrors.email.show">
                 <Input.Label id="email">Email</Input.Label>
                 <Input.Normal
                     v-bind="emailAttrs"
-                    id="email"
                     v-model="email"
                     type="email"
                     placeholder="exemplo@dominio.com"
                 />
-                <Input.Error v-if="hasErrors.email.show">
+                <Input.Error>
                     {{ hasErrors.email.message }}
                 </Input.Error>
             </Input.Root>
 
-            <Input.Root>
+            <Input.Root id="registerPassword" :errors="hasErrors.password.show">
                 <Input.Label id="registerPassword">Senha</Input.Label>
-                <Input.Password
-                    v-bind="passwordAttrs"
-                    id="registerPassword"
-                    v-model="password"
-                    placeholder="********"
-                />
-                <Input.Error v-if="hasErrors.password.show">
+                <Input.Password v-bind="passwordAttrs" v-model="password" placeholder="********" />
+                <Input.Error>
                     {{ hasErrors.password.message }}
                 </Input.Error>
             </Input.Root>

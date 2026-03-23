@@ -14,17 +14,24 @@ function useLogin() {
     });
 
     const onSubmit = handleSubmit(async (values) => {
-        const { data } = await axios.post(
-            '/api/auth/sign-in',
-            {
-                email: values.customerEmail,
-                password: values.customerPassword,
-            },
-            {
-                withCredentials: true,
-            },
-        );
-        console.log(data);
+        try {
+            const { data } = await axios.post(
+                '/api/auth/sign-in',
+                {
+                    email: values.customerEmail,
+                    password: values.customerPassword,
+                },
+                {
+                    withCredentials: true,
+                },
+            );
+
+            if (data.success) {
+                window.location.href = '/dashboard';
+            }
+        } catch (error) {
+            console.error(error);
+        }
     });
 
     return {

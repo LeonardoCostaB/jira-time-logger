@@ -1,112 +1,90 @@
-<script setup lang="ts">
-    import { computed } from 'vue';
+<script lang="ts" setup>
+    import type { JiraIssue } from '~~/server/db/generated';
 
-    import { Input } from '../../components/input';
+    import IssuesModal from './components/issues-modal.vue';
 
-    import { useJiraPreferences } from './use-jira-preferences';
+    interface JiraAccountDisplay {
+        id: string;
+        companyEmail: string;
+        active: boolean;
+        issues: JiraIssue[];
+    }
 
-    const { onSubmit, defineField, errors } = useJiraPreferences();
-
-    const [jiraEmail, jiraEmailAttrs] = defineField('jiraEmail');
-
-    const [jiraApiToken, jiraApiTokenAttrs] = defineField('jiraApiToken');
-
-    const [jiraIssueKey, jiraIssueKeyAttrs] = defineField('jiraIssueKey');
-
-    const [jiraIssueTime, jiraIssueTimeAttrs] = defineField('jiraIssueTime');
-
-    const hasErrors = computed(() => {
-        return {
-            jiraEmail: {
-                show: !!errors.value.jiraEmail,
-                message: errors.value.jiraEmail,
-            },
-            jiraApiToken: {
-                show: !!errors.value.jiraApiToken,
-                message: errors.value.jiraApiToken,
-            },
-            jiraIssueKey: {
-                show: !!errors.value.jiraIssueKey,
-                message: errors.value.jiraIssueKey,
-            },
-            jiraIssueTime: {
-                show: !!errors.value.jiraIssueTime,
-                message: errors.value.jiraIssueTime,
-            },
-        };
+    const {
+        data: jiraPreferences,
+        pending,
+        error,
+    } = await useFetch<JiraAccountDisplay[]>('/api/pvt/jira/preferences', {
+        lazy: true,
+        transform: (data) => data || [],
     });
+
+    const shouldShowIssuesModal = ref(false);
 </script>
 
 <template>
-    <main class="mx-auto max-w-7xl pt-10">
-        <h1 class="mb-6 text-3xl font-bold">Jira Preferences</h1>
+    <main class="mx-auto h-screen max-w-7xl pt-10">
+        <h1 class="sr-only mb-6 text-3xl font-bold">Dashboard</h1>
 
-        <section>
-            <form class="mx-auto max-w-xl rounded-lg bg-slate-800 p-4" @submit.prevent="onSubmit">
-                <Input.Root>
-                    <Input.Label id="jiraEmail">Seu email no Jira</Input.Label>
-                    <Input.Normal
-                        v-bind="jiraEmailAttrs"
-                        id="jiraEmail"
-                        v-model="jiraEmail"
-                        type="email"
-                        placeholder="exemplo@dominio.com"
-                        :errors="hasErrors.jiraEmail.show"
-                    />
-                    <Input.Error v-if="hasErrors.jiraEmail.show" class="block">
-                        {{ hasErrors.jiraEmail.message }}
-                    </Input.Error>
-                </Input.Root>
+        <section class="flex h-[90%] items-center justify-center">
+            <div v-if="pending">
+                <p>Carregando preferências...</p>
+            </div>
 
-                <Input.Root class="my-6">
-                    <Input.Label id="jiraApiToken">API Token</Input.Label>
-                    <Input.Normal
-                        v-bind="jiraApiTokenAttrs"
-                        id="jiraApiToken"
-                        v-model="jiraApiToken"
-                        type="password"
-                        placeholder="Digite o seu API Token do Jira"
-                        :errors="hasErrors.jiraApiToken.show"
-                    />
-                    <Input.Error v-if="hasErrors.jiraApiToken.show" class="block">
-                        {{ hasErrors.jiraApiToken.message }}
-                    </Input.Error>
-                </Input.Root>
+            <div v-else-if="error">
+                <p>Erro ao carregar dados. Tente novamente mais tarde.</p>
+            </div>
 
-                <Input.Root>
-                    <Input.Label id="jiraIssueKey">Issue Key</Input.Label>
-                    <Input.Normal
-                        v-bind="jiraIssueKeyAttrs"
-                        id="jiraIssueKey"
-                        v-model="jiraIssueKey"
-                        type="text"
-                        placeholder="Digite a Issue Key (ex: PROJ-123)"
-                        :errors="hasErrors.jiraIssueKey.show"
-                    />
-                    <Input.Error v-if="hasErrors.jiraIssueKey.show" class="block">
-                        {{ hasErrors.jiraIssueKey.message }}
-                    </Input.Error>
-                </Input.Root>
+            <div v-else-if="jiraPreferences && jiraPreferences.length > 0">
+                <h2>Suas Contas Jira</h2>
 
-                <Input.Root class="my-6">
-                    <Input.Label id="jiraIssueTime">Issue Time</Input.Label>
-                    <Input.Normal
-                        v-bind="jiraIssueTimeAttrs"
-                        id="jiraIssueTime"
-                        v-model="jiraIssueTime"
-                        type="text"
-                        placeholder="Digite o tempo da Issue (ex: 2h 30m)"
-                        :errors="hasErrors.jiraIssueTime.show"
-                    />
-                    <Input.Error v-if="hasErrors.jiraIssueTime.show" class="block">
-                        {{ hasErrors.jiraIssueTime.message }}
-                    </Input.Error>
-                </Input.Root>
+                <table class="w-full rounded-lg bg-slate-700 text-left">
+                    <thead>
+                        <tr>
+                            <th class="p-4">Email</th>
+                            <th class="p-4">Status</th>
+                            <th class="p-4">Issues</th>
+                            <th class="p-4">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="account in jiraPreferences" :key="account.id">
+                            <td class="p-4">{{ account.companyEmail }}</td>
+                            <td class="p-4">
+                                <span :class="account.active ? 'status-active' : 'status-inactive'">
+                                    {{ account.active ? 'Ativo' : 'Inativo' }}
+                                </span>
+                            </td>
+                            <td class="p-4">
+                                <button class="underline" @click="shouldShowIssuesModal = true">
+                                    Ver Issues
+                                </button>
 
-                <button type="submit" class="w-full rounded-md bg-violet-600 p-3 text-white">
-                    Salvar Preferências
-                </button>
-            </form>
+                                <IssuesModal
+                                    :email="account.companyEmail"
+                                    :issues="account.issues"
+                                    :show="shouldShowIssuesModal"
+                                    @close="shouldShowIssuesModal = false"
+                                />
+                            </td>
+                            <td class="p-4">
+                                <button
+                                    @click="
+                                        $router.push(`/dashboard/jira/preferences/${account.id}`)
+                                    "
+                                >
+                                    Configurar Automação
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div v-else class="flex flex-col gap-6">
+                <p class="text-xl">Nenhuma conta Jira vinculada.</p>
+                <button @click="$router.push('dashboard/jira/preferences')">Conectar agora</button>
+            </div>
         </section>
     </main>
 </template>

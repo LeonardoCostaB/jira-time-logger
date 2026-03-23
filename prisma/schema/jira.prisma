@@ -1,30 +1,50 @@
 model JiraAccount {
-  id           String  @id @default(uuid())
-  companyEmail String
-  apiToken     String
-  issueKey     String
-  issueTime    String
-  active       Boolean @default(true)
+    id            String  @id @default(uuid())
+    companyEmail  String
+    companyDomain String
+    apiToken      String
+    active        Boolean @default(true)
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  worklogHistories WorklogHistory[]
+    issues JiraIssue[]
 
-  @@unique([companyEmail])
-  @@map("jira_accounts")
+    @@unique([companyEmail, companyDomain])
+    @@map("jira_accounts")
+}
+
+model JiraIssue {
+    id              String @id @default(cuid())
+    issueKey        String
+    issueTime       Int
+    totalSpentSoFar Int    @default(0)
+
+    active    Boolean   @default(true)
+    startDate DateTime?
+    endDate   DateTime?
+
+    jiraAccountId String
+    jiraAccount   JiraAccount @relation(fields: [jiraAccountId], references: [id], onDelete: Cascade)
+
+    worklogHistories WorklogHistory[]
+
+    @@map("jira_issues")
 }
 
 model WorklogHistory {
-  id        String   @id @default(cuid())
-  userId    String
-  timeSpent String
-  date      DateTime 
-  createdAt DateTime @default(now())
+    id            String   @id @default(cuid())
+    userId        String
+    secondsPerDay Int
+    date          DateTime
+    status        String   @default("SUCCESS") // "SUCCESS" or "FAILED"
+    errorMessage  String?
 
-  jiraAccountId String
-  jiraAccount   JiraAccount @relation(fields: [jiraAccountId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
 
-  @@unique([jiraAccountId, date])
-  @@map("jira_worklog_histories")
+    issueId String
+    issue   JiraIssue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+    @@unique([issueId, date])
+    @@map("jira_worklog_histories")
 }

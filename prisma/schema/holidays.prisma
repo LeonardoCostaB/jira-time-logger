@@ -1,0 +1,21 @@
+model HoliDays {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    year      Int      @unique
+
+    daysOff DaysOff[]
+
+    @@map("holidays")
+}
+
+model DaysOff {
+    id   Int    @id @default(autoincrement())
+    date String
+    name String
+    type String
+
+    holidDaysYear Int
+    holiDays      HoliDays @relation(fields: [holidDaysYear], references: [year], onDelete: Cascade)
+
+    @@map("days_off")
+}
