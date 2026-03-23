@@ -5,9 +5,8 @@
 </script>
 
 <template>
-    <NuxtPage>
-        <Toaster />
-    </NuxtPage>
+    <Toaster />
+    <NuxtPage />
 </template>
 
 <style>
