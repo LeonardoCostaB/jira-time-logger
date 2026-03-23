@@ -1,5 +1,6 @@
 <script setup lang="ts">
     import { computed } from 'vue';
+    import { PhArrowLeft } from '@phosphor-icons/vue';
 
     import { Input } from '../../../../components/input';
 
@@ -41,7 +42,15 @@
 
 <template>
     <main class="mx-auto max-w-7xl pt-10">
-        <h1 class="mb-6 text-center text-3xl font-bold">Jira Preferences</h1>
+        <div class="relative mx-auto mb-6 flex w-full max-w-xl items-center justify-center">
+            <NuxtLink
+                class="absolute left-0 mb-6 inline-block rounded bg-slate-600 px-4 py-2 text-sm transition-colors hover:bg-slate-500"
+                to="/dashboard"
+            >
+                <PhArrowLeft />
+            </NuxtLink>
+            <h1 class="mb-6 text-center text-3xl font-bold">Jira Preferences</h1>
+        </div>
 
         <section>
             <form class="mx-auto max-w-xl rounded-lg bg-slate-800 p-4" @submit.prevent="onSubmit">

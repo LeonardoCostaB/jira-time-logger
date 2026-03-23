@@ -37,9 +37,9 @@
 
             <div v-else-if="jiraPreferences && jiraPreferences.length > 0">
                 <div class="flex items-center justify-between pb-4">
-                    <h2 class="text-lg">Suas Contas no Jira</h2>
+                    <h2 class="text-2xl">Suas Contas no Jira</h2>
                     <NuxtLink
-                        class="rounded bg-blue-100 px-4 py-2 text-blue-700"
+                        class="rounded bg-violet-600 px-4 py-2 text-sm transition-colors hover:bg-violet-500"
                         to="/dashboard/jira/preferences"
                     >
                         Adicionar nova automação
