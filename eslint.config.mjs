@@ -32,6 +32,7 @@ export default withNuxt({
             },
         ],
 
+        "vue/no-multiple-template-root": 0,
         '@typescript-eslint/no-explicit-any': 'off',
         'comma-dangle': [
             'error',

@@ -1,12 +1,18 @@
 export default defineNuxtRouteMiddleware(async (to) => {
+    const headers = useRequestHeaders(['cookie']);
+
     const publicRoutes = ['/', '/login', '/criar-conta'];
     const isPublicRoute = publicRoutes.includes(to.path);
 
-    if (isPublicRoute) return;
+    if (isPublicRoute) {
+        if (headers.cookie?.includes('client-access-token')) {
+            return navigateTo('/dashboard');
+        }
+
+        return;
+    }
 
     try {
-        const headers = useRequestHeaders(['cookie']);
-
         await $fetch('/api/pvt/auth/me', {
             credentials: 'include',
             headers,

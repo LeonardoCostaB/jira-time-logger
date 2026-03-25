@@ -29,6 +29,8 @@ model JiraIssue {
 
     worklogHistories WorklogHistory[]
 
+    @@unique([issueKey, jiraAccountId])
+
     @@map("jira_issues")
 }
 

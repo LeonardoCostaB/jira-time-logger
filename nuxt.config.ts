@@ -8,4 +8,8 @@ export default defineNuxtConfig({
     typescript: {
         typeCheck: false,
     },
+
+    runtimeConfig: {
+        CRON_SECRET: process.env.CRON_SECRET,
+    },
 });

@@ -1,9 +1,8 @@
-import { JiraPreferencesSchema } from '~~/app/pages/dashboard/jira/preferences/jira-preferences.schema';
+import { JiraPreferencesSchema } from '~/pages/dashboard/(pages)/jira/preferences/jira-preferences.schema';
 
 import prismaService from '../../../db/prisma';
-import { convertToSeconds } from '../cron/utils/convert-to-seconds';
-
-import { encrypt } from './utils/encrypt';
+import { convertToSeconds } from '../../utils/convert-to-seconds';
+import { encrypt } from '../../utils/encrypt';
 
 export default defineEventHandler(async (event) => {
     const user = event.context.user as { sub: string };

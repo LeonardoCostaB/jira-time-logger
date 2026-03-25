@@ -1,3 +1,4 @@
+import type { H3EventContext } from 'h3';
 import { createError, getCookie } from 'h3';
 import jwt from 'jsonwebtoken';
 
@@ -15,7 +16,7 @@ export default defineEventHandler((event) => {
 
     const token = getCookie(event, ACCESS_TOKEN_NAME);
 
-    if (!token) throw createError({ statusCode: 401, message: 'Unauthorized' });
+    if (!token) throw createError({ statusCode: 403, message: 'Forbidden' });
 
     try {
         const user = jwt.verify(token, process.env.JWT_SECRET as string) as {
@@ -32,6 +33,6 @@ export default defineEventHandler((event) => {
             console.error('Error verifying JWT token:', error);
         }
 
-        throw createError({ statusCode: 401, message: 'Unauthorized' });
+        throw createError({ statusCode: 403, message: 'Forbidden' });
     }
 });
