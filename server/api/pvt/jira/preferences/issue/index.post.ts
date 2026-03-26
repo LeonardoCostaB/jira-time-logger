@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-import { convertToSeconds } from '~~/server/api/utils/convert-to-seconds';
 import prisma from '~~/server/db/prisma';
+import { convertToSeconds } from '~~/server/utils/convert-to-seconds';
 
 const createIssueSchema = z.object({
     jiraAccountId: z.string(),

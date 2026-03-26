@@ -1,7 +1,7 @@
 import z from 'zod';
 
-import { decrypt, encrypt } from '~~/server/api/utils/encrypt';
 import { prisma } from '~~/server/db/prisma';
+import { decrypt, encrypt } from '~~/server/utils/encrypt';
 
 const registerAccountSchema = z.object({
     companyDomain: z.string(),

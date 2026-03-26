@@ -1,6 +1,8 @@
 <script lang="ts" setup>
     import { PhX } from '@phosphor-icons/vue';
 
+    defineEmits(['close']);
+
     const props = defineProps<{
         show: boolean;
         title: string;

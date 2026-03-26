@@ -1,8 +1,8 @@
 import { JiraPreferencesSchema } from '~/pages/dashboard/(pages)/jira/preferences/jira-preferences.schema';
+import prisma from '~~/server/db/prisma';
 
-import prismaService from '../../../db/prisma';
-import { convertToSeconds } from '../../utils/convert-to-seconds';
-import { encrypt } from '../../utils/encrypt';
+import { convertToSeconds } from '../../../../utils/convert-to-seconds';
+import { encrypt } from '../../../../utils/encrypt';
 
 export default defineEventHandler(async (event) => {
     const user = event.context.user as { sub: string };
@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
         const { jiraEmail, jiraApiToken, jiraIssueKey, jiraDomain, jiraIssueTime } =
             JiraPreferencesSchema.parse(body);
 
-        const userFound = await prismaService.user.findUnique({
+        const userFound = await prisma.user.findUnique({
             where: { id: user.sub },
             select: {
                 id: true,
@@ -28,7 +28,7 @@ export default defineEventHandler(async (event) => {
 
         const encryptedApiToken = encrypt(jiraApiToken);
 
-        await prismaService.jiraAccount.upsert({
+        await prisma.jiraAccount.upsert({
             where: {
                 companyEmail_companyDomain: {
                     companyEmail: jiraEmail,

@@ -1,7 +1,7 @@
-import { isSameDay } from '~~/server/api/pvt/jira/utils/day-compare';
 import type { JiraIssue } from '~~/server/db/generated';
 import { prisma } from '~~/server/db/prisma';
 
+import { isSameDay } from '../_utils/is-same-day';
 import type { JiraWorklogs } from '../index.get';
 
 interface RegisterIssueForWorklogParams {

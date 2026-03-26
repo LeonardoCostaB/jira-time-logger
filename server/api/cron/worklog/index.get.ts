@@ -1,9 +1,9 @@
 import prisma from '~~/server/db/prisma';
 
-import { decrypt } from '../../utils/encrypt';
-import { isHoliday } from '../utils/is-holiday';
+import { decrypt } from '../../../utils/encrypt';
 
-import { registerIssueForWorklog } from './service/issue-register';
+import { registerIssueForWorklog } from './_service/issue-register';
+import { isHoliday } from './_utils/is-holiday';
 
 export type JiraWorklogs = Array<{
     companyEmail: string;

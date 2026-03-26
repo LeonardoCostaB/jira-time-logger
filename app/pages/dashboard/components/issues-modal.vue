@@ -6,6 +6,8 @@
 
     import { formatTime, formatToDays } from '../utils/format-time';
 
+    defineEmits(['issue-modal-close']);
+
     const props = defineProps<{
         jiraAccountId: string;
         email: string;
@@ -55,7 +57,7 @@
             {{ props.email }}
         </h2>
 
-        <button class="absolute right-6 top-6" type="button" @click="$emit('close')">
+        <button class="absolute right-6 top-6" type="button" @click="$emit('issue-modal-close')">
             <PhX />
         </button>
 
@@ -79,7 +81,7 @@
                     <td class="p-4">
                         <div class="flex items-center justify-center gap-2">
                             <NuxtLink
-                                :to="`/dashboard/issues/${issue.id}`"
+                                :to="`/dashboard/jira/issues/${issue.id}`"
                                 class="rounded-full bg-slate-500 p-1 hover:bg-violet-500"
                             >
                                 <PhArrowSquareOut />

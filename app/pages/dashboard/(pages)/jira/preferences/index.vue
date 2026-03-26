@@ -2,7 +2,7 @@
     import { computed } from 'vue';
     import { PhArrowLeft } from '@phosphor-icons/vue';
 
-    import { Input } from '../../../../components/input';
+    import { Input } from '~/components/input';
 
     import { useJiraPreferences } from './use-jira-preferences';
 

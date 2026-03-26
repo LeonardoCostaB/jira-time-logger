@@ -97,11 +97,12 @@
                                     </button>
 
                                     <IssuesModal
+                                        :ref="account.id"
                                         :jira-account-id="account.id"
                                         :email="account.companyEmail"
                                         :issues="account.issues"
                                         :show="shouldShowIssuesModal"
-                                        @close="shouldShowIssuesModal = false"
+                                        @issue-modal-close="shouldShowIssuesModal = false"
                                     />
                                 </td>
                                 <td class="p-4">
@@ -109,6 +110,7 @@
                                         <NuxtLink
                                             :to="`/dashboard/jira/preferences/${account.id}`"
                                             class="rounded-full bg-slate-500 p-1 hover:bg-violet-500"
+                                            :prefetch="false"
                                         >
                                             <PhArrowSquareOut />
                                         </NuxtLink>
