@@ -8,17 +8,15 @@ export function formatTime(seconds: number): string {
     return `${hoursStr}${minutesStr}${secondsStr}`.trim();
 }
 
-export function formatToDays(seconds: number): string {
-    const hours = Math.floor((seconds % 86400) / 3600);
-    const hoursStr = hours > 0 ? `${hours}h ` : '';
+export function formatToDays(seconds: number, registerPerDay: number): string {
+    const days = Math.floor(seconds / registerPerDay);
+    const daysStr = days > 0 ? `${days}d ` : '';
 
-    if (hours === 8) {
+    if (days === 1) {
         return '1d';
-    } else if (hours > 8) {
-        const days = Math.floor(hours / 8);
-        const daysStr = days > 0 ? `${days}d ` : '';
-        return daysStr;
+    } else if (days > 1) {
+        return `${days}d`;
     }
 
-    return hoursStr;
+    return daysStr;
 }

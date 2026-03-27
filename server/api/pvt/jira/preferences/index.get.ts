@@ -32,7 +32,7 @@ export default defineEventHandler(async (event) => {
             companyEmail: account.companyEmail,
             active: account.active,
             issues: account.issues.map((issue) => ({
-                // id: issue.id,
+                id: issue.id,
                 issueKey: issue.issueKey,
                 issueTime: issue.issueTime,
                 active: issue.active,

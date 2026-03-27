@@ -1,7 +1,8 @@
 <script lang="ts" setup>
     import { toast } from 'vue-sonner';
-    import { PhArrowSquareOut, PhTrash, PhX } from '@phosphor-icons/vue';
+    import { PhTimer, PhTrash, PhX } from '@phosphor-icons/vue';
 
+    import type { JiraWorklogs } from '~~/server/api/cron/worklog/index.get';
     import type { JiraIssue } from '~~/server/db/generated';
 
     import { formatTime, formatToDays } from '../utils/format-time';
@@ -14,6 +15,19 @@
         issues: JiraIssue[];
         show: boolean;
     }>();
+
+    const tableHeaders = computed(() => {
+        if (!props.issues || props.issues.length === 0) return [];
+
+        return Object.keys(props.issues?.[0] || {}).filter((key) => key !== 'id');
+    });
+
+    const shouldShowTimeModal = ref({
+        id: '',
+        key: '',
+        time: '',
+        show: false,
+    });
 
     const shouldShowDeleteModal = ref({
         id: '',
@@ -44,10 +58,36 @@
             return;
         }
     }
+
+    async function RegisterTime() {
+        try {
+            const registerTimeFetch = await $fetch<{
+                statusCode: number;
+                message: string;
+                worklogs: JiraWorklogs;
+            }>(`/api/pvt/jira/preferences/issue/${shouldShowTimeModal.value.id}/register-time`, {
+                method: 'POST',
+            });
+
+            if (registerTimeFetch?.statusCode === 200) {
+                toast.success(
+                    `8h registradas na issue ${shouldShowTimeModal.value.key} com sucesso!`,
+                );
+                shouldShowTimeModal.value = { id: '', key: '', time: '', show: false };
+            }
+        } catch (error: any) {
+            toast.error(
+                error?.data?.message ||
+                    'Ocorreu um erro ao registrar o tempo. Tente novamente mais tarde.',
+            );
+            return;
+        }
+    }
 </script>
 
 <template>
     <div v-show="props.show" class="fixed inset-0 bg-black bg-opacity-50" />
+
     <div
         v-show="props.show"
         class="fixed left-1/2 top-1/2 mx-auto flex h-fit w-full max-w-3xl -translate-x-1/2 -translate-y-1/2 transform flex-col items-center justify-center rounded-lg bg-slate-600 p-6"
@@ -64,7 +104,7 @@
         <table v-if="props.issues.length" class="mt-8 w-full rounded-lg bg-slate-700 text-left">
             <thead>
                 <tr>
-                    <th v-for="(value, key) in props.issues[0]" :key="key" class="p-4">
+                    <th v-for="key in tableHeaders" :key="key" class="p-4">
                         {{ key }}
                     </th>
                     <th class="p-4">Total em dias</th>
@@ -77,15 +117,23 @@
                     <td class="p-4">{{ formatTime(issue.issueTime) }}</td>
                     <td class="p-4">{{ issue.active }}</td>
                     <td class="p-4">{{ issue.totalSpentSoFar }}</td>
-                    <td class="p-4">{{ formatToDays(issue.totalSpentSoFar) }}</td>
+                    <td class="p-4">{{ formatToDays(issue.totalSpentSoFar, issue.issueTime) }}</td>
                     <td class="p-4">
                         <div class="flex items-center justify-center gap-2">
-                            <NuxtLink
-                                :to="`/dashboard/jira/issues/${issue.id}`"
+                            <button
+                                type="button"
                                 class="rounded-full bg-slate-500 p-1 hover:bg-violet-500"
+                                @click="
+                                    shouldShowTimeModal = {
+                                        id: issue.id,
+                                        key: issue.issueKey,
+                                        time: formatTime(issue.issueTime),
+                                        show: true,
+                                    }
+                                "
                             >
-                                <PhArrowSquareOut />
-                            </NuxtLink>
+                                <PhTimer />
+                            </button>
 
                             <button
                                 type="button"
@@ -126,6 +174,28 @@
             <button
                 class="w-full rounded border border-slate-500 px-4 py-2 text-sm transition-colors hover:bg-slate-500/50"
                 @click="shouldShowDeleteModal = { id: '', key: '', show: false }"
+            >
+                Cancelar
+            </button>
+        </template>
+    </Modal>
+
+    <Modal
+        :title="'Registrar Hora'"
+        :description="`Deseja registrar ${shouldShowTimeModal.time} nessa tarefa?`"
+        :actions="true"
+        :show="shouldShowTimeModal.show"
+    >
+        <template #actions>
+            <button
+                class="w-full rounded bg-green-700/50 px-4 py-2 text-sm transition-colors hover:bg-green-500"
+                @click="RegisterTime()"
+            >
+                Confirmar
+            </button>
+            <button
+                class="w-full rounded border border-slate-500 px-4 py-2 text-sm transition-colors hover:bg-slate-500/50"
+                @click="shouldShowTimeModal = { id: '', key: '', time: '', show: false }"
             >
                 Cancelar
             </button>

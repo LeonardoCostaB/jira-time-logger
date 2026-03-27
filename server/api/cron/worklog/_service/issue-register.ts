@@ -105,7 +105,7 @@ export async function registerIssueForWorklog({
                 ...workLog,
                 error: {
                     message: `Error logging worklog for issue ${issue.issueKey}: ${error instanceof Error ? error.message : String(error)}`,
-                    details: null,
+                    details: JSON.stringify(error, null, 2),
                 },
             });
         }

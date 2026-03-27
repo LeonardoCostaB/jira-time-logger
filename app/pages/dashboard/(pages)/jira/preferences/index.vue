@@ -77,7 +77,7 @@
                             v-bind="jiraDomainAttrs"
                             v-model="jiraDomain"
                             type="text"
-                            placeholder="exemplo@dominio.com"
+                            placeholder="ex: minha-empresa.atlassian.net"
                         />
                         <Input.Error class="block">
                             {{ hasErrors.jiraDomain.message }}
