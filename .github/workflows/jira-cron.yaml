@@ -11,5 +11,5 @@ jobs:
         steps:
             - name: Jira job daily
               run: |
-                  curl -f -X GET "https://jira-time-logger-six.vercel.app/api/cron/test" \
+                  curl -f -X GET "https://jira-time-logger-six.vercel.app/api/cron/worklog" \
                   -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
