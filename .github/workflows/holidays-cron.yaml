@@ -1,0 +1,16 @@
+name: Holidays Cron Job
+
+on:
+    schedule:
+        - cron: '0 3 1 1 *'
+
+    workflow_dispatch:
+
+jobs:
+    sync_holidays:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Holidays job yearly
+              run: |
+                  curl -f -X GET "https://jira-time-logger-six.vercel.app/api/cron/holidays" \
+                  -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
