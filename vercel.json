@@ -9,7 +9,7 @@
         "schedule": "0 3 1 1 *"
     },
     {
-        "path": "server/api/cron/test.get",
+        "path": "/api/cron/test",
         "schedule": "10 16 * * *"
     }
   ]
