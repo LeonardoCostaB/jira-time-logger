@@ -47,6 +47,10 @@ export default defineEventHandler(async (event) => {
                 worklogs[0].error.details,
             );
 
+            await sendDiscordNotification(
+                `Suas horas não foram registradas para issue **${worklogs[0].issueKey}** do usuário **${worklogs[0].companyEmail}**.\n\nErro: ${worklogs[0].error.message}`,
+            );
+
             throw createError({
                 statusCode: 400,
                 message: worklogs[0].error.message,
@@ -57,6 +61,18 @@ export default defineEventHandler(async (event) => {
         console.log(
             new Date().toISOString(),
             `Registered worklog for issue ${worklogs[0]?.issueKey} of user ${issue.jiraAccount.companyEmail} in company ${issue.jiraAccount.companyDomain}. Worklogs: ${JSON.stringify(worklogs, null, 2)}`,
+        );
+
+        await sendDiscordNotification(
+            worklogs
+                .map((worklog) => {
+                    if (worklog.error) {
+                        return `Suas horas não foram registradas para issue **${worklog.issueKey}** do usuário **${worklog.companyEmail}**.\n\nErro: ${worklog.error.message}`;
+                    }
+
+                    return `Horas registradas para issue **${worklog.issueKey}** do usuário **${worklog.companyEmail}**.\nTempo gasto: **${worklog.timeSpent}** segundos.\nEmpresa: **${worklog.domain}**`;
+                })
+                .join('\n'),
         );
 
         return {
@@ -70,6 +86,7 @@ export default defineEventHandler(async (event) => {
         }
 
         console.error('Error registering issue for worklog:', error);
+
         throw createError({ statusCode: 500, message: 'Internal Server Error' });
     }
 });
