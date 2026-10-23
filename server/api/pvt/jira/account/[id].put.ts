@@ -1,6 +1,7 @@
 import z from 'zod';
 
 import { prisma } from '~~/server/db/prisma';
+import { encrypt } from '~~/server/utils/encrypt';
 
 const updateAccountSchema = z.object({
     companyDomain: z.string().optional(),
@@ -21,7 +22,7 @@ export default defineEventHandler(async (event) => {
             data: {
                 companyDomain,
                 companyEmail,
-                apiToken,
+                apiToken: apiToken ? encrypt(apiToken) : undefined,
             },
         });
 

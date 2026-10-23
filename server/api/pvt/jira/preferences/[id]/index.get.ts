@@ -10,6 +10,9 @@ export default defineEventHandler(async (event) => {
                 id: params.id,
                 userId: user.sub,
             },
+            include: {
+                issues: { orderBy: { issueKey: 'asc' } },
+            },
             omit: {
                 apiToken: true,
             },
