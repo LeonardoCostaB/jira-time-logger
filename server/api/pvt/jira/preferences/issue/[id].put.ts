@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
         const { issueKey, issueTime } = updateIssueSchema.parse(body);
 
         const updatedIssue = await prisma.jiraIssue.update({
-            where: { id: params.id, jiraAccount: { is: { id: user.sub } } },
+            where: { id: params.id, jiraAccount: { is: { userId: user.sub } } },
             data: {
                 issueKey,
                 issueTime: issueTime ? convertToSeconds(issueTime) : undefined,
