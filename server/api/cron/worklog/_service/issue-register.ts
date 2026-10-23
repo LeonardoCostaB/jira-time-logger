@@ -1,8 +1,11 @@
 import type { JiraIssue } from '~~/server/db/generated';
 import { prisma } from '~~/server/db/prisma';
+import { getJiraBaseUrl } from '~~/server/utils/jira-base-url';
 
 import { isSameDay } from '../_utils/is-same-day';
 import type { JiraWorklogs } from '../index.get';
+
+import { getTodayJiraWorklog } from './jira-worklog-today';
 
 interface RegisterIssueForWorklogParams {
     user: {
@@ -23,7 +26,46 @@ export async function registerIssueForWorklog({
     issues,
 }: RegisterIssueForWorklogParams): Promise<RegisterIssueForWorklogResult> {
     const today = new Date();
+    const todayInSaoPaulo = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'America/Sao_Paulo',
+    }).format(today);
     const worklogs: JiraWorklogs = [];
+
+    const buildWorklog = (issue: JiraIssue, error: JiraWorklogs[number]['error']) => ({
+        companyEmail: user.companyEmail,
+        domain: user.companyDomain,
+        issueKey: issue.issueKey,
+        timeSpent: issue.issueTime,
+        error,
+    });
+
+    try {
+        const todayJiraWorklog = await getTodayJiraWorklog(user);
+
+        if (todayJiraWorklog.hasWorklogToday) {
+            const hours = (todayJiraWorklog.totalSeconds / 3600).toFixed(2);
+
+            return {
+                worklogs: issues.map((issue) =>
+                    buildWorklog(issue, {
+                        message: `O usuário ${user.companyEmail} já lançou ${hours}h hoje no Jira (issues: ${todayJiraWorklog.issueKeys.join(', ')}). Nenhuma hora foi registrada automaticamente para evitar duplicação.`,
+                        details: null,
+                    }),
+                ),
+            };
+        }
+    } catch (error) {
+        // Falha na verificação bloqueia o registro: duplicar horas é pior do que
+        // deixar o lançamento para uma execução manual.
+        return {
+            worklogs: issues.map((issue) =>
+                buildWorklog(issue, {
+                    message: `Não foi possível verificar no Jira as horas já lançadas hoje por ${user.companyEmail}: ${error instanceof Error ? error.message : String(error)}`,
+                    details: JSON.stringify(error, null, 2),
+                }),
+            ),
+        };
+    }
 
     for (const issue of issues) {
         const workLog = {
@@ -56,10 +98,10 @@ export async function registerIssueForWorklog({
             continue;
         }
 
-        const url = `https://${user.companyDomain}/rest/api/3/issue/${issue.issueKey}/worklog`;
         const auth = Buffer.from(`${user.companyEmail}:${user.apiToken}`).toString('base64');
 
         try {
+            const url = `${await getJiraBaseUrl(user.companyDomain)}/issue/${issue.issueKey}/worklog`;
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
@@ -69,7 +111,7 @@ export async function registerIssueForWorklog({
                 },
                 body: JSON.stringify({
                     timeSpentSeconds: issue.issueTime,
-                    started: new Date().toISOString().slice(0, 10) + 'T09:00:00.000-0300',
+                    started: `${todayInSaoPaulo}T09:00:00.000-0300`, // format: 2024-01-01T09:00:00.000-0300
                 }),
             });
 
